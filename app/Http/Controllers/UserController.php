@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -15,7 +16,10 @@ class UserController extends Controller
         //   order by created_at desc
         //   limit 3
 
-        $users = User::all(); // replace this with Eloquent statement
+        $users = User::whereNotNull('email_verified_at')
+            ->orderBy('created_at','desc')
+            ->limit(3)
+            ->get(); // replace this with Eloquent statement
 
         return view('users.index', compact('users'));
     }
@@ -23,8 +27,14 @@ class UserController extends Controller
     public function show($userId)
     {
         $user = NULL; // TASK: find user by $userId or show "404 not found" page
+        
 
-        return view('users.show', compact('user'));
+        if($user == $userId){
+            return view('users.show', compact('user'));
+        }
+        else{
+            return "404";
+        }
     }
 
     public function check_create($name, $email)
@@ -32,6 +42,21 @@ class UserController extends Controller
         // TASK: find a user by $name and $email
         //   if not found, create a user with $name, $email and random password
         $user = NULL;
+
+        $findUser = User::where('name',$name)
+            ->where('email',$email)
+            ->count();
+        
+        if($findUser < 1){
+            $create = User::create([
+                'name' => $name,
+                'email' =>  $email,
+                'password' => Hash::make('12345678')
+            ]);
+        }
+        else{
+            response()->json(['success' => 'success'], 200);
+        }
 
         return view('users.show', compact('user'));
     }
@@ -52,6 +77,7 @@ class UserController extends Controller
         // $request->users is an array of IDs, ex. [1, 2, 3]
 
         // Insert Eloquent statement here
+        User::whereIn('id',$request->users)->delete();
 
         return redirect('/')->with('success', 'Users deleted');
     }
