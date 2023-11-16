@@ -29,7 +29,9 @@
                                      class="block mt-1 w-full"
                                      type="text"
                                      name="name"
-                                     value="???"
+                                     value=@if (session('name'))
+                                        {{ session('name') }}
+                                     @endif
                                      required />
                         </div>
 
@@ -40,7 +42,9 @@
                                      class="block mt-1 w-full"
                                      type="email"
                                      name="email"
-                                     value="???"
+                                     value=@if (session('email'))
+                                     {{ session('email') }}
+                                    @endif
                                      required />
                         </div>
 
